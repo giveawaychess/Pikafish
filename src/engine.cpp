@@ -82,6 +82,9 @@ Engine::Engine(std::string path) :
     options["MultiPV"] << Option(1, 1, MAX_MOVES);
     options["Move Overhead"] << Option(10, 0, 5000);
     options["nodestime"] << Option(0, 0, 10000);
+    options["FakeNodes"] << Option(1, 0, 10000);
+    options["FakeTBHits"] << Option(1, 0, 10000);
+    options["FakeDepth"] << Option(0, 0, 10000);
     options["EvalFile"] << Option(EvalFileDefaultName, [this](const Option& o) {
         load_network(o);
         return std::nullopt;
