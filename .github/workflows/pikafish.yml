@@ -1,4 +1,4 @@
-name: Pikafish
+name: Pikafish-dev
 
 on:
   push:
@@ -6,12 +6,12 @@ on:
       - master
 
 jobs:
-  Pikafish-x86-64:
+  Pikafish:
     name: ${{ matrix.config.name }}${{ matrix.arch }}
     runs-on: ${{ matrix.config.os }}
     env:
       ARCH: x86-64${{ matrix.arch }}
-      COMPCXX: clang++
+      COMPILER: clang++
       COMP: clang
       EXE: pikafish${{ matrix.arch }}${{ matrix.config.ext }}
       SDE: ${{ matrix.config.sde }}
@@ -27,10 +27,13 @@ jobs:
             shell: msys2 {0}
             ext: .exe
             sde: /d/a/Pikafish/Pikafish/.output/sde-temp-files/sde-external-9.27.0-2023-09-13-win/sde.exe -future --
-        arch: ["-vnni512", "-avx512", "-avx512f", "-avxvnni", "-bmi2", "-avx2", "-sse41-popcnt"]
+        arch: ["-vnni512", "-bmi2", "-avx2"]
         exclude:
-          - arch: -avxvnni
+          - arch: -vnni512
             config: {os: ubuntu-20.04}
+          - arch: -avx2
+            config: {os: ubuntu-20.04}
+
     defaults:
       run:
         working-directory: src
@@ -61,6 +64,7 @@ jobs:
 
       - name: Compile ${{ matrix.arch }} build
         run: |
+          wget -q https://github.com/official-pikafish/Networks/releases/download/master-net/pikafish.nnue
           make -j profile-build EXE=$EXE WINE_PATH="$SDE"
           make strip EXE=$EXE
           cp $EXE ../
@@ -84,61 +88,18 @@ jobs:
             Copying.txt
             README.md
             Top CPU Contributors.txt
-
-  Pikafish-MacOS:
-    name: MacOS-apple-silicon
-    runs-on: macos-latest
-    env:
-      ARCH: apple-silicon
-      COMPCXX: clang++
-      COMP: clang
-      EXE: pikafish-apple-silicon
-    defaults:
-      run:
-        working-directory: src
-        shell: bash
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Compile apple-silicon build
-        run: |
-          make -j profile-build EXE=$EXE
-          make strip EXE=$EXE
-          cp $EXE ../
-
-      - name: Download wiki
-        run: |
-          git clone https://github.com/official-pikafish/Pikafish.wiki.git ../Wiki
-          cd ../Wiki
-          rm -rf .git
-
-      # Artifacts automatically get zipped.
-      # To avoid double-zipping, we use the unzipped directory
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Pikafish-MacOS-apple-silicon
-          path: |
-            ${{ env.EXE }}
-            Wiki
-            AUTHORS
-            CONTRIBUTING.md
-            Copying.txt
-            README.md
-            Top CPU Contributors.txt
-
   Pikafish-Android:
     name: Android-${{ matrix.arch }}
     runs-on: ubuntu-latest
     env:
       ARCH: ${{ matrix.arch }}
-      COMPCXX: aarch64-linux-android21-clang++
+      COMPILER: aarch64-linux-android21-clang++
       COMP: ndk
       EXE: pikafish-${{ matrix.arch }}
       LDFLAGS: "-static -Wno-unused-command-line-argument"
     strategy:
       matrix:
-        arch: ["armv8-dotprod", "armv8"]
+        arch: ["armv8-dotprod"]
     defaults:
       run:
         working-directory: src
@@ -165,6 +126,7 @@ jobs:
       - name: Compile ${{ matrix.arch }} build
         run: |
           export PATH=${{ env.ANDROID_NDK_BIN }}:$PATH
+          wget -q https://github.com/official-pikafish/Networks/releases/download/master-net/pikafish.nnue
           make -j profile-build EXE=$EXE WINE_PATH=$EMU
           make strip EXE=$EXE
           cp $EXE ../
