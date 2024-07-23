@@ -1767,7 +1767,7 @@ void SearchManager::pv(const Search::Worker&     worker,
                        const TranspositionTable& tt,
                        Depth                     depth) const {
 
-    const auto  nodes     = threads.nodes_searched();
+    const auto  nodes     = threads.nodes_searched() * size_t(worker.options["FakeNodes"]);
     const auto& rootMoves = worker.rootMoves;
     const auto& pos       = worker.rootPos;
     size_t      pvIdx     = worker.pvIdx;
@@ -1812,7 +1812,6 @@ void SearchManager::pv(const Search::Worker&     worker,
             info.bound = bound;
 
         info.timeMs   = time;
-        nodes *= size_t(worker.options["FakeNodes"]);
         info.nodes    = nodes;
         info.nps      = nodes * 1000 / time;
         info.tbHits   = size_t(worker.options["FakeTBHits"]) * nodes / 1000;
