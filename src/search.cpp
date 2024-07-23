@@ -1802,7 +1802,7 @@ void SearchManager::pv(const Search::Worker&     worker,
 
         InfoFull info;
 
-        info.depth    = d + options["FakeDepth"];
+        info.depth    = d + worker.options["FakeDepth"];
         info.selDepth = rootMoves[i].selDepth;
         info.multiPV  = i + 1;
         info.score    = {v, pos};
@@ -1812,10 +1812,10 @@ void SearchManager::pv(const Search::Worker&     worker,
             info.bound = bound;
 
         info.timeMs   = time;
-        nodes *= options["FakeNodes"];
+        nodes *= worker.options["FakeNodes"];
         info.nodes    = nodes;
         info.nps      = nodes * 1000 / time;
-        info.tbHits   = options["FakeTBHits"] * nodes / 1000;
+        info.tbHits   = worker.options["FakeTBHits"] * nodes / 1000;
         info.pv       = pv;
         info.hashfull = tt.hashfull();
 
